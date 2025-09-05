@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard - Web Jualan</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    .admin-wrap { max-width:1200px; margin:24px auto; padding:20px; }
+    .flex { display:flex; gap:20px; align-items:flex-start; }
+    .panel { background:#fff; padding:16px; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.06); }
+    .panel h3 { margin-top:0; }
+    #products-table, #orders-table { width:100%; border-collapse:collapse; margin-top:8px; }
+    #products-table th, #products-table td, #orders-table th, #orders-table td { border:1px solid #eee; padding:8px; text-align:left; }
+    .small-btn { padding:6px 8px; border-radius:6px; border:none; cursor:pointer; }
+    .btn-edit { background:#4a90e2; color:#fff; }
+    .btn-delete { background:#ff6b6b; color:#fff; }
+    .btn-done { background:#2ecc71; color:#fff; }
+    .btn-cancel { background:#ff4757; color:#fff; }
+    .form-row { display:flex; gap:8px; margin-bottom:8px; }
+    .form-row input { flex:1; padding:8px; border-radius:6px; border:1px solid #ddd; }
+    .top-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../index.html">User View</a>
+    <a href="dashboard.html">Admin Dashboard</a>
+    <a href="login.html" id="admin-logout">Logout</a>
+  </nav>
+
+  <div class="admin-wrap">
+    <div class="top-actions">
+      <h1>Admin Dashboard</h1>
+      <div>
+        <button class="button" onclick="loadProducts()">Refresh Produk</button>
+        <button class="button" onclick="loadOrders()">Refresh Pesanan</button>
+      </div>
+    </div>
+
+    <div class="flex">
+      <!-- Manage Products -->
+      <div class="panel" style="flex:1;">
+        <h3>Kelola Produk</h3>
+        <form id="add-product-form">
+          <div class="form-row">
+            <input id="p-name" placeholder="Nama produk" required />
+            <input id="p-price" type="number" placeholder="Harga (angka)" required />
+          </div>
+          <div class="form-row">
+            <input id="p-image" placeholder="URL gambar (atau letakkan nama file di assets/images/)" required />
+            <input id="p-desc" placeholder="Deskripsi singkat" />
+          </div>
+          <button type="submit" class="button">Tambah Produk</button>
+        </form>
+
+        <h4 style="margin-top:16px;">Daftar Produk</h4>
+        <table id="products-table">
+          <thead>
+            <tr><th>Nama</th><th>Harga</th><th>Gambar</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="products-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Orders -->
+      <div class="panel" style="flex:1;">
+        <h3>Daftar Pesanan</h3>
+        <table id="orders-table">
+          <thead><tr><th>ID</th><th>Produk</th><th>Qty</th><th>Total</th><th>Phone</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase lib + client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="../supabase/client.js"></script>
+  <script src="scripts.js"></script>
+</body>
+</html>
