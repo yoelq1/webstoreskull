@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - Web Jualan</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="supabase/client.js"></script>
+</head>
+<body>
+<h2>Register</h2>
+<form id="register-form">
+  <input type="text" id="username" placeholder="Username" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="text" id="phone" placeholder="No Telepon" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="password" id="confirm_password" placeholder="Konfirmasi Password" required>
+  <button type="submit">Register</button>
+</form>
+
+<script>
+document.getElementById("register-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const phone = document.getElementById("phone").value;
+  const password = document.getElementById("password").value;
+  const confirm = document.getElementById("confirm_password").value;
+
+  if(password !== confirm){
+    alert("Password tidak sama!");
+    return;
+  }
+
+  const { data, error } = await supabase.from('users').insert([{username,email,phone,password}]);
+  if(error) alert(error.message);
+  else {
+    alert("Registrasi berhasil!");
+    window.location.href = "login.html";
+  }
+});
+</script>
+</body>
+</html>

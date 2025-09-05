@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat Pembelian</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html">Beranda</a>
+    <a href="product.html">Produk</a>
+    <a href="cart.html">Keranjang</a>
+    <a href="history.html" class="active">History</a>
+    <a href="login.html" id="logout-link">Logout</a>
+  </nav>
+
+  <section class="container">
+    <h1>Riwayat Pembelian</h1>
+    <div id="history-container" class="history-list">
+      <p>Sedang memuat...</p>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase/client.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadHistory();
+
+      // Logout
+      const logoutLink = document.getElementById("logout-link");
+      logoutLink.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await supabase.auth.signOut();
+        window.location.href = "login.html";
+      });
+    });
+
+    async function loadHistory() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Silakan login dulu.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("orders")
+        .select(`
+          id,
+          quantity,
+          total,
+          status,
+          products(name),
+          order_logs(changed_at)
+        `)
+        .eq("user_id", user.id)
+        .order("changed_at", { foreignTable: "order_logs", ascending: false });
+
+      if (error) {
+        console.error(error);
+        document.getElementById("history-container").innerHTML =
+          "<p>Gagal memuat history.</p>";
+        return;
+      }
+
+      const container = document.getElementById("history-container");
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+        container.innerHTML = "<p>Belum ada riwayat pembelian.</p>";
+        return;
+      }
+
+      data.forEach(order => {
+        const changedAt = order.order_logs.length > 0
+          ? new Date(order.order_logs[0].changed_at).toLocaleString()
+          : "-";
+
+        container.innerHTML += `
+          <div class="history-card">
+            <h3>${order.products.name}</h3>
+            <p><strong>Jumlah:</strong> ${order.quantity}</p>
+            <p><strong>Total:</strong> Rp ${order.total}</p>
+            <p><strong>Status:</strong> ${order.status}</p>
+            <p><strong>Update Terakhir:</strong> ${changedAt}</p>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>

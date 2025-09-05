@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifikasi Kode - Web Jualan</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="assets/js/script.js"></script>
+</head>
+<body>
+<h2>Verifikasi Kode</h2>
+<form id="verify-form">
+  <input type="text" id="code" placeholder="Masukkan Kode" required>
+  <button type="submit">Verifikasi</button>
+</form>
+
+<script>
+document.getElementById("verify-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const code = document.getElementById("code").value;
+  if(code == localStorage.getItem("reset_code")){
+    window.location.href = "new_password.html";
+  } else {
+    alert("Kode salah!");
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keranjang</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">Web Jualan</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="product.html">Produk</a></li>
+      <li><a href="cart.html" class="active">Keranjang</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="#" id="logout-link">Logout</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1>Keranjang Belanja</h1>
+    <div id="cart-container" class="cart-container">
+      <p>Keranjang kosong.</p>
+    </div>
+    <div id="cart-total" class="cart-total"></div>
+    <button id="checkout-btn" class="btn">Checkout</button>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Web Jualan. All Rights Reserved.</p>
+  </footer>
+
+  <!-- Supabase & Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase/client.js"></script>
+  <script>
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      renderCart();
+
+      // Logout
+      document.getElementById("logout-link").addEventListener("click", async (e) => {
+        e.preventDefault();
+        await supabase.auth.signOut();
+        window.location.href = "login.html";
+      });
+
+      // Checkout
+      document.getElementById("checkout-btn").addEventListener("click", async () => {
+        if (cart.length === 0) {
+          alert("Keranjang kosong!");
+          return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert("Silakan login dulu.");
+          window.location.href = "login.html";
+          return;
+        }
+
+        // Simpan ke Supabase orders
+        for (let item of cart) {
+          const { error } = await supabase.from("orders").insert({
+            user_id: user.id,
+            product_id: item.id,
+            quantity: item.quantity,
+            total: item.price * item.quantity,
+            status: "pending"
+          });
+          if (error) {
+            console.error(error);
+            alert("Gagal menyimpan pesanan.");
+            return;
+          }
+        }
+
+        alert("Pesanan berhasil dibuat!");
+        localStorage.removeItem("cart");
+        cart = [];
+        renderCart();
+        window.location.href = "history.html";
+      });
+    });
+
+    function renderCart() {
+      const container = document.getElementById("cart-container");
+      const totalEl = document.getElementById("cart-total");
+      container.innerHTML = "";
+      totalEl.innerHTML = "";
+
+      if (cart.length === 0) {
+        container.innerHTML = "<p>Keranjang kosong.</p>";
+        return;
+      }
+
+      let total = 0;
+      cart.forEach((item, index) => {
+        total += item.price * item.quantity;
+        container.innerHTML += `
+          <div class="cart-item">
+            <h3>${item.name}</h3>
+            <p>Harga: Rp ${item.price}</p>
+            <p>Jumlah: ${item.quantity}</p>
+            <button onclick="removeItem(${index})" class="btn-danger">Hapus</button>
+          </div>
+        `;
+      });
+
+      totalEl.innerHTML = `<h3>Total: Rp ${total}</h3>`;
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+    }
+  </script>
+</body>
+</html>
